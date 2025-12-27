@@ -1,13 +1,27 @@
-const Book = require("../models/books");
+const Book = require("../models/bookModel");
 
 
 // get all books
 async function getAllBooks(req, res) {
     try {
-        const books = await Book.find().populate('owner', '-_id');
+        const filter = { };
+        const { search } = req.query;
+
+
+        if (search) {
+            filter.$or = [
+                { title: { $regex: search, $options: "i" } },
+                { author: { $regex: search, $options: "i" } },
+                { desc: { $regex: search, $options: "i" } },
+            ];
+        }
+
+
+        const books = await Book.find(filter).populate('owner', '-_id -password');
 
         res.status(200).json({ message: 'all books returned', books });
     } catch (error) {
+        console.log(error);
         res.status(500).json({ message: 'internal server error' });
     }
 };

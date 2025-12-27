@@ -6,6 +6,7 @@ const bookSchema = new mongoose.Schema({
     price: { type: Number, required: true },
     // img: { type: String, required: true },
     condition: { type: String, enum: ['new', 'used'], default: 'new' },
+    // stock: {type: Number, required: true},
     author: {type: String, required: true},
     owner: {type: mongoose.Schema.Types.ObjectId, ref: 'users'}
 }, {timestamps: true});

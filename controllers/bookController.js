@@ -1,4 +1,6 @@
 const Book = require("../models/bookModel");
+const Purchase = require("../models/purchaseModel");
+const User = require("../models/userModel");
 
 
 // get all books
@@ -17,7 +19,7 @@ async function getAllBooks(req, res) {
         }
 
 
-        const books = await Book.find(filter).populate('owner', '-_id -password');
+        const books = await Book.find(filter).populate('owner', '_id -password');
 
         res.status(200).json({ message: 'all books returned', books });
     } catch (error) {
@@ -47,11 +49,11 @@ async function getBookById(req, res) {
 //create book
 async function createBook(req, res) {
     try {
-        const { price, title, desc, author } = req.body;
+        const { price, title, desc, author, stock } = req.body;
 
         const owner = req.user.id;
 
-        const book = await Book.create({ price, title, desc, author, owner });
+        const book = await Book.create({ price, title, desc, author, owner, stock });
         res.status(201).json({ message: 'book created', book });
     } catch (error) {
         console.log(error);
@@ -98,4 +100,51 @@ async function deleteBook(req, res) {
 }
 
 
-module.exports = { createBook, getAllBooks, getBookById, updateBook, deleteBook };
+// buy book
+async function buyBook(req, res) {
+    try {
+        const bookId = req.params.id;
+        const buyerId = req.user.id;
+        const book = await Book.findById(bookId);
+        if (!book) {
+            return res.status(404).json({ message: 'book not found' });
+        }
+        const sellerId = book.owner;
+
+        if (buyerId == sellerId) {
+            return res.status(409).json({ message: 'conflict' });
+        }
+
+        if (book.stock == 0) {
+            return res.status(403).json({ message: `the book with id ${bookId} is out of stock` });
+        } 
+
+
+        book.stock = book.stock - 1;
+        await book.save();
+
+        const newPurchase = await Purchase.create({
+            //book information
+            book: bookId,
+            price: book.price,
+
+            // seller information 
+            seller: sellerId,
+
+            // buyer information
+            buyer: buyerId,
+        });
+
+
+        res.status(200).json({
+            message: `the book with id ${bookId} sold`,
+            purchase: newPurchase,
+            stock: book.stock,
+        });
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+
+module.exports = { createBook, getAllBooks, getBookById, updateBook, deleteBook, buyBook };

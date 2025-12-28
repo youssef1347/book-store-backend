@@ -48,9 +48,20 @@ async function editProfile(req, res) {
 
 
 //get user books
-async function getUserBooks(req, res) {
+async function getBooksForSale(req, res) {
     try {
         
+        const { id } = req.user;
+        const book = await Book.find({
+            owner: id,
+            stock: {$gt: 0},
+        });
+
+        if (!book) {
+            return res.status(404).json({ message: 'books not found' });
+        }
+
+        res.json({ message: 'books for sale returned', book });
     } catch (error) {
         console.log(error);
     }
@@ -67,4 +78,4 @@ async function getUserPurchases(req, res) {
 }
 
 
-module.exports = { getProfile, editProfile, getUserBooks, getUserPurchases };
+module.exports = { getProfile, editProfile, getBooksForSale, getUserPurchases };

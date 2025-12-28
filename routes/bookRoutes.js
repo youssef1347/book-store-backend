@@ -9,6 +9,7 @@ router.post('/', authMiddleware, controllers.createBook);
 router.put('/:id', authMiddleware, controllers.updateBook);
 router.get('/:id', authMiddleware, controllers.getBookById);
 router.delete('/:id', authMiddleware, controllers.deleteBook);
+router.post('/:id/buy', authMiddleware, controllers.buyBook);
 
 
 module.exports = router;

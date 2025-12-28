@@ -1,11 +1,14 @@
 const Book = require("../models/bookModel");
 const Purchase = require("../models/purchaseModel");
 const User = require("../models/userModel");
+const { sendMial } = require("../utils/sendEmail");
 
 
-// get all books
+// view all books
 async function getAllBooks(req, res) {
     try {
+
+        //filter/search by title, author and desc
         const filter = { };
         const { search } = req.query;
 
@@ -29,7 +32,7 @@ async function getAllBooks(req, res) {
 };
 
 
-//get one book
+//view book details
 async function getBookById(req, res) {
     try {
         const { id } = req.params;
@@ -46,7 +49,7 @@ async function getBookById(req, res) {
 };
 
 
-//create book
+//create a new book
 async function createBook(req, res) {
     try {
         const { price, title, desc, author, stock } = req.body;
@@ -117,8 +120,10 @@ async function buyBook(req, res) {
 
         if (book.stock == 0) {
             return res.status(403).json({ message: `the book with id ${bookId} is out of stock` });
-        } 
+        }
 
+        const seller = await User.findById(sellerId);
+        const buyer = await User.findById(buyerId);
 
         book.stock = book.stock - 1;
         await book.save();
@@ -136,9 +141,18 @@ async function buyBook(req, res) {
         });
 
 
+        await sendMial(
+            seller.email,
+            'book sold',
+            `the buyer ${buyer.username} bought your book ${book.title}`
+        )
+
+
         res.status(200).json({
-            message: `the book with id ${bookId} sold`,
+            message: `the book with title ${book.title} sold`,
             purchase: newPurchase,
+            buyerName: buyer.username,
+            sellerName: seller.username,
             stock: book.stock,
         });
     } catch (error) {

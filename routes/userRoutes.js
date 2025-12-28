@@ -5,6 +5,7 @@ const { authMiddleware } = require("../middlewares/authMiddleware.js");
 
 router.get('/profile', authMiddleware, controllers.getProfile);
 router.get('/books_for_sale', authMiddleware, controllers.getBooksForSale);
+router.get('/get_user_purchases', authMiddleware, controllers.getUserPurchases);
 router.put('/edit_profile', authMiddleware, controllers.editProfile);
 
 

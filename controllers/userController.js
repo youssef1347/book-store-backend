@@ -1,7 +1,8 @@
 const User = require("../models/userModel");
 const Book = require("../models/bookModel");
+const Purchase = require("../models/purchaseModel");
 
-//get profile
+//view profile
 async function getProfile(req, res) {
     try {
         const { id } = req.user;
@@ -47,7 +48,7 @@ async function editProfile(req, res) {
 };
 
 
-//get user books
+//get list of user books
 async function getBooksForSale(req, res) {
     try {
         
@@ -68,12 +69,30 @@ async function getBooksForSale(req, res) {
 }
 
 
-//get user purchases
+//view purchase history
 async function getUserPurchases(req, res) {
     try {
-        
+        const { id } = req.user;
+        const filter = {
+            $or: [
+                { seller: id },
+                { buyer: id },
+            ]
+        };
+
+        const purchase = await Purchase.find(filter)
+            .populate('buyer', 'username email')
+            .populate('seller', 'username email')
+            .populate('book', 'title author');
+
+
+        console.log(filter);
+        console.log(purchase);
+
+        res.json({ message: 'purchases returned', purchase });
     } catch (error) {
         console.log(error);
+        res.status(500).json({ message: 'internal server error' });
     }
 }
 

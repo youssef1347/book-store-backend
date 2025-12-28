@@ -23,12 +23,15 @@ async function editProfile(req, res) {
         const { id } = req.user;
 
 
-        const { username, email, age } = req.body;
+        const updates = {};
+        if (req.body.username) updates.username = req.body.username;
+        if (req.body.email) updates.email = req.body.email;
+        if (req.body.age) updates.age = req.body.age;
 
-        const data = { username, email, age };
+
         const updatedUser = await User.findByIdAndUpdate(
             id,
-            data,
+            updates,
             { new: true },
         );
 
@@ -36,7 +39,7 @@ async function editProfile(req, res) {
             return res.status(404).json({ message: 'user not found' });
         }
 
-        res.json({ message: 'returned your profile', profileData: updatedUser });
+        res.json({ message: 'returned your profile', email: updates.email,profileData: updatedUser });
     } catch (error) {
         console.log(error)
         res.status(500).json({ message: 'internal server error' });
@@ -52,3 +55,16 @@ async function getUserBooks(req, res) {
         console.log(error);
     }
 }
+
+
+//get user purchases
+async function getUserPurchases(req, res) {
+    try {
+        
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+
+module.exports = { getProfile, editProfile, getUserBooks, getUserPurchases };

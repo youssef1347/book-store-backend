@@ -16,7 +16,6 @@ const PORT = process.env.PORT || 3000;
 connectDatabase();
 
 
-
 app.use('/api/auth', authRoute);
 app.use('/api/book', bookRoute);
 app.use('/api/purchase', purchaseRoute);

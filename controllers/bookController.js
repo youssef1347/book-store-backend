@@ -53,10 +53,17 @@ async function getBookById(req, res) {
 async function createBook(req, res) {
     try {
         const { price, title, desc, author, stock } = req.body;
-
         const owner = req.user.id;
-
-        const book = await Book.create({ price, title, desc, author, owner, stock });
+        const img = req.file.path;
+        const book = await Book.create({
+            price,
+            title,
+            desc,
+            author,
+            owner,
+            stock,
+            img,
+        });
         res.status(201).json({ message: 'book created', book });
     } catch (error) {
         console.log(error);

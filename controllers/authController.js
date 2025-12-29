@@ -53,7 +53,15 @@ async function register(req, res) {
             process.env.JWT_SECRET,
             { expiresIn: '1h' }); //generate token
 
-        res.status(201).json({ message: 'user created, please verify your email', token, data: { user } });
+
+        const data = {
+            username: user.username,
+            email: user.email,
+            age: user.age,
+            emailToken,
+        }
+
+        res.status(201).json({ message: 'user created, please verify your email', token, data });
     } catch (error) {
         res.status(500).json({ message: 'internal server error' });
         console.log(error)
@@ -92,7 +100,6 @@ async function login(req, res) {
 
         const data = {
             username: user.username,
-            password: user.password,
             email,
             token
         }
@@ -107,6 +114,7 @@ async function login(req, res) {
 }
 
 
+//email confirmation
 async function verifyEmail(req, res) {
     try {
         const { token } = req.params;
@@ -115,8 +123,8 @@ async function verifyEmail(req, res) {
 
         if (!user) return res.status(400).json({ message: 'the token is invalid' });
 
-        user.emailVerified = true;
-        user.emailToken = undefined;
+        user.emailVerified = true; //make the email verified
+        user.emailToken = undefined; //delete the email token
         await user.save();
 
         res.status(200).json({ message: 'email verified' });
